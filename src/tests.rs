@@ -5,5 +5,5 @@ use crate::environment::CaptchaEnvironment;
 fn test1() {
     let mut environment = CaptchaEnvironment::default();
     let cb = environment.load_captcha_breaker(CaptchaBreaker::ChineseClick0).unwrap();
-    println!("{:?}", cb);
+    println!("{}", cb.run())
 }

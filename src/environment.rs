@@ -1,7 +1,7 @@
 use std::collections::{HashMap};
 use std::error::Error;
 use ort::session::Session;
-use crate::captcha::{CaptchaBreaker, CaptchaBreakerTrait};
+use crate::captcha::{CaptchaBreakerBuilder};
 use crate::loader::{ModelLoader, ModelLoaderTrait};
 use crate::model::Model;
 
@@ -19,8 +19,6 @@ impl Default for CaptchaEnvironment {
     }
 }
 
-
-
 impl CaptchaEnvironment {
     pub fn with_model_loader(model_loader: ModelLoader) -> Self {
         CaptchaEnvironment {
@@ -29,8 +27,11 @@ impl CaptchaEnvironment {
         }
     }
 
-    pub fn load_captcha_breaker(&mut self, cb: CaptchaBreaker) -> Result<impl CaptchaBreakerTrait, Box<dyn Error>> {
-        cb
+    pub fn load_captcha_breaker<T>(&mut self, cb: T) -> Result<T::InnerType<'_>, Box<dyn Error>>
+    where
+    T: CaptchaBreakerBuilder
+    {
+        cb.build(self)
     }
 
     pub(crate) fn load_model(&mut self, model: Model) -> Result<&Session, Box<dyn Error>> {

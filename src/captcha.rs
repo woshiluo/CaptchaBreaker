@@ -7,8 +7,14 @@ use crate::model::Model;
 pub enum CaptchaBreaker {
     ChineseClick0,
 }
-impl CaptchaBreaker {
-    pub(crate) fn build(self, captcha_environment : &mut CaptchaEnvironment) -> Result<impl CaptchaBreakerTrait, Box<dyn Error>> {
+pub trait CaptchaBreakerBuilder {
+    type InnerType<'a>: CaptchaBreakerTrait<'a>;
+    fn build(self, captcha_environment : &mut CaptchaEnvironment) -> Result<Self::InnerType<'_>, Box<dyn Error>>;
+}
+
+impl CaptchaBreakerBuilder for CaptchaBreaker {
+    type InnerType<'a> = ChineseClick0<'a>;
+    fn build(self, captcha_environment : &mut CaptchaEnvironment) -> Result<Self::InnerType<'_>, Box<dyn Error>> {
         match self {
             CaptchaBreaker::ChineseClick0 => {
                 ChineseClick0::build(captcha_environment)
@@ -17,8 +23,9 @@ impl CaptchaBreaker {
     }
 }
 
-pub(crate) trait CaptchaBreakerTrait {
-    fn build(captcha_environment: &mut CaptchaEnvironment) -> Result<impl CaptchaBreakerTrait, Box<dyn Error>> ;
+pub(crate) trait CaptchaBreakerTrait<'a> {
+    fn build(captcha_environment: &'a mut CaptchaEnvironment) -> Result<Self, Box<dyn Error>>
+    where Self: Sized;
 }
 
 
@@ -28,13 +35,18 @@ pub struct ChineseClick0<'a> {
     siamese: &'a Session,
 }
 
-impl CaptchaBreakerTrait for ChineseClick0<'_> {
-    fn build(captcha_environment: &mut CaptchaEnvironment) -> Result<ChineseClick0, Box<dyn Error>> {
+impl<'a> CaptchaBreakerTrait<'a> for ChineseClick0<'a> {
+    fn build(captcha_environment: &'a mut CaptchaEnvironment) -> Result<ChineseClick0, Box<dyn Error>> {
         let session = captcha_environment.load_models(vec![Model::Yolo11n, Model::Siamese])?;
         Ok(ChineseClick0 {
             yolo11n: session[0],
             siamese: session[1],
         })
     }
+}
 
+impl ChineseClick0<'_> {
+    pub fn run(&self) -> i8 {
+        1
+    }
 }
