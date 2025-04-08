@@ -1,5 +1,7 @@
-mod captcha;
 
-enum CaptchaBreaker {
-    ChineseClick0,
-}
+mod model;
+#[cfg(test)]
+mod tests;
+mod environment;
+mod loader;
+mod captcha;
