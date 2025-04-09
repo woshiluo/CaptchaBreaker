@@ -30,13 +30,14 @@ impl CaptchaBreaker for ChineseClick0 {
     }
 }
 
+#[warn(dead_code)]
 #[derive(Debug, Clone)]
 struct Bbox {
     x_min: f32,
     y_min: f32,
     x_max: f32,
     y_max: f32,
-    _confidence: f32,
+    confidence: f32,
     class: f32,
 }
 
@@ -108,7 +109,7 @@ impl ChineseClick0 {
                 y_min: row[Dim(1)],
                 x_max: row[Dim(2)],
                 y_max: row[Dim(3)],
-                _confidence: row[Dim(4)],
+                confidence: row[Dim(4)],
                 class: row[Dim(5)],
             })
             .collect()
