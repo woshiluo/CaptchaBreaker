@@ -37,9 +37,7 @@ struct Bbox {
     y_min: f32,
     x_max: f32,
     y_max: f32,
-    #[warn(dead_code)]
     confidence: f32,
-    #[warn(dead_code)]
     class: f32,
 }
 
