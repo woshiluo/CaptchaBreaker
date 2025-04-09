@@ -10,7 +10,7 @@ fn test1() {
     let cb: ChineseClick0 = environment.load_captcha_breaker().unwrap();
     let start_time = Instant::now();
     for _ in 0..100 {
-        let res = cb.run(&image::open("images/0.jpg").unwrap());
+        cb.run(&image::open("images/0.jpg").unwrap());
     }
     let duration = start_time.elapsed();
     println!("Time elapsed: {:?}", duration);
