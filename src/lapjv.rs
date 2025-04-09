@@ -330,8 +330,7 @@ where
         final_j.unwrap()
     }
 
-    // Scan all columns in TODO starting from arbitrary column in SCAN
-    // and try to decrease d of the TODO columns using the SCAN column
+
     fn scan_dense(
         &self,
         plo: &mut usize,
@@ -348,7 +347,6 @@ where
             let i = self.in_col[j];
             let mind = d[j];
             let h = self.reduced_cost(i, j) - mind;
-            // For all columns in TODO
             for k in hi..collist.len() {
                 let j = collist[k];
                 let cred_ij = self.reduced_cost(i, j) - h;
