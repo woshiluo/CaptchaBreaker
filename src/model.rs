@@ -1,5 +1,5 @@
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) enum Model {
+pub enum Model {
     Yolo11n,
     Siamese,
 }
