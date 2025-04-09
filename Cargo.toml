@@ -2,7 +2,7 @@
 name = "captcha_breaker"
 version = "0.0.0-dev.1"
 edition = "2024"
-license = "AGPL-3"
+license = "AGPL-3.0-only"
 description = "多种验证码识别实现"
 homepage = "https://github.com/Amorter/CaptchaBreaker"
 repository = "https://github.com/Amorter/CaptchaBreaker"
