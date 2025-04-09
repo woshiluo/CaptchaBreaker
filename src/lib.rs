@@ -1,7 +1,6 @@
-
 mod model;
 #[cfg(test)]
 mod tests;
-mod environment;
-mod loader;
-mod captcha;
+pub mod environment;
+pub mod loader;
+pub mod captcha;
