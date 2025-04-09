@@ -30,14 +30,16 @@ impl CaptchaBreaker for ChineseClick0 {
     }
 }
 
-#[warn(dead_code)]
-#[derive(Debug, Clone)]
+
+#[derive(Debug)]
 struct Bbox {
     x_min: f32,
     y_min: f32,
     x_max: f32,
     y_max: f32,
+    #[warn(dead_code)]
     confidence: f32,
+    #[warn(dead_code)]
     class: f32,
 }
 
