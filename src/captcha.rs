@@ -6,6 +6,8 @@ use ort::inputs;
 use ort::session::Session;
 use std::error::Error;
 use std::rc::Rc;
+use crate::lapjv;
+
 pub trait CaptchaBreaker {
     fn build(captcha_environment: &CaptchaEnvironment) -> Result<Self, Box<dyn Error>>
     where

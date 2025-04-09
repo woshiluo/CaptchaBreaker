@@ -17,10 +17,12 @@ harness = false
 
 [dependencies]
 image = "^0.25.6"
-lapjv = { version = "0.2.1", git = "https://github.com/Amorter/lapjv-rust"}
 ndarray = "^0.16.1"
 ort = { version = "=2.0.0-rc.9", features = [ "cuda" ] }
 reqwest = {version = "^0.12.15", features = ["blocking"]}
+num-traits = "^0.2.19"
+log = "^0.4.27"
+
 
 [features]
 default = ["chinese_click_0"]
