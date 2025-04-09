@@ -1,14 +1,15 @@
-use std::error::Error;
-use std::rc::Rc;
-use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba};
-use ndarray::{s, Array2, Array4, ArrayView2, Axis, Dim, Ix2};
-use ort::inputs;
-use ort::session::Session;
 use crate::environment::CaptchaEnvironment;
 use crate::model::Model;
+use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba};
+use ndarray::{Array2, Array4, ArrayView2, Axis, Dim, Ix2, s};
+use ort::inputs;
+use ort::session::Session;
+use std::error::Error;
+use std::rc::Rc;
 pub trait CaptchaBreaker {
     fn build(captcha_environment: &CaptchaEnvironment) -> Result<Self, Box<dyn Error>>
-    where Self: Sized;
+    where
+        Self: Sized;
 }
 
 #[derive(Debug)]
@@ -88,10 +89,17 @@ impl ChineseClick0 {
             }
         }
 
-        let outputs = self.yolo11n.run(inputs!["images" => input].unwrap()).unwrap();
-        let output = outputs["output0"].try_extract_tensor::<f32>().unwrap().slice_move(s![0, .., ..]);
+        let outputs = self
+            .yolo11n
+            .run(inputs!["images" => input].unwrap())
+            .unwrap();
+        let output = outputs["output0"]
+            .try_extract_tensor::<f32>()
+            .unwrap()
+            .slice_move(s![0, .., ..]);
 
-        output.axis_iter(Axis(0))
+        output
+            .axis_iter(Axis(0))
             .filter(|row| row[Dim(4)] > 0.5)
             .map(|row| Bbox {
                 x_min: row[Dim(0)],
@@ -110,8 +118,12 @@ impl ChineseClick0 {
     }
 
     /// 截取并预处理图像块
-    fn crop_and_resize(&self, image: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-                       ans_boxes: &[Bbox], question_boxes: &[Bbox]) -> Array4<f32> {
+    fn crop_and_resize(
+        &self,
+        image: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+        ans_boxes: &[Bbox],
+        question_boxes: &[Bbox],
+    ) -> Array4<f32> {
         const TARGET_SIZE: u32 = 96;
         let batch_size = ans_boxes.len() + question_boxes.len();
         let mut batch = Array4::zeros((batch_size, 3, TARGET_SIZE as usize, TARGET_SIZE as usize));
@@ -120,30 +132,40 @@ impl ChineseClick0 {
         self.process_boxes(&mut batch, image, ans_boxes, 0..ans_boxes.len());
 
         // 处理问题框
-        self.process_boxes(&mut batch, image, question_boxes, ans_boxes.len()..batch_size);
+        self.process_boxes(
+            &mut batch,
+            image,
+            question_boxes,
+            ans_boxes.len()..batch_size,
+        );
 
         batch
     }
 
     /// 处理图像块
-    fn process_boxes(&self, batch: &mut Array4<f32>,
-                     image: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-                     boxes: &[Bbox],
-                     indices: std::ops::Range<usize>) {
+    fn process_boxes(
+        &self,
+        batch: &mut Array4<f32>,
+        image: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+        boxes: &[Bbox],
+        indices: std::ops::Range<usize>,
+    ) {
         const TARGET_SIZE: u32 = 96;
         for (i, bbox) in boxes.iter().enumerate() {
             let index = indices.start + i;
-            let cropped = image.view(
-                bbox.x_min as u32,
-                bbox.y_min as u32,
-                (bbox.x_max - bbox.x_min) as u32,
-                (bbox.y_max - bbox.y_min) as u32
-            ).to_image();
+            let cropped = image
+                .view(
+                    bbox.x_min as u32,
+                    bbox.y_min as u32,
+                    (bbox.x_max - bbox.x_min) as u32,
+                    (bbox.y_max - bbox.y_min) as u32,
+                )
+                .to_image();
             let resized = image::imageops::resize(
                 &cropped,
                 TARGET_SIZE,
                 TARGET_SIZE,
-                image::imageops::FilterType::Lanczos3
+                image::imageops::FilterType::Lanczos3,
             );
 
             for y in 0..TARGET_SIZE {
@@ -159,7 +181,10 @@ impl ChineseClick0 {
 
     /// 特征提取
     fn extract_features(&self, images: &Array4<f32>) -> Array2<f32> {
-        let outputs = self.siamese.run(inputs!["input" => images.clone()].unwrap()).unwrap();
+        let outputs = self
+            .siamese
+            .run(inputs!["input" => images.clone()].unwrap())
+            .unwrap();
         outputs["output"]
             .try_extract_tensor::<f32>()
             .unwrap()
@@ -185,7 +210,10 @@ impl ChineseClick0 {
         let mut matrix = Array2::zeros((question.nrows(), ans.nrows()));
         for (i, q_feat) in question.rows().into_iter().enumerate() {
             for (j, a_feat) in ans.rows().into_iter().enumerate() {
-                matrix[[i, j]] = (q_feat.to_owned() - a_feat.to_owned()).mapv(|x| x.powi(2)).sum().sqrt();
+                matrix[[i, j]] = (q_feat.to_owned() - a_feat.to_owned())
+                    .mapv(|x| x.powi(2))
+                    .sum()
+                    .sqrt();
             }
         }
         matrix
@@ -198,7 +226,8 @@ impl ChineseClick0 {
 
     /// 生成结果字符串
     fn generate_results(&self, ans_boxes: &[Bbox], indices: &[usize]) -> Vec<(f32, f32)> {
-        indices.iter()
+        indices
+            .iter()
             .map(|&i| {
                 let b = &ans_boxes[i];
                 ((b.x_min + b.x_max) / 2.0, (b.y_min + b.y_max) / 2.0)

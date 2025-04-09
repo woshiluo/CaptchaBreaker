@@ -1,9 +1,8 @@
+use crate::captcha::ChineseClick0;
+use crate::environment::CaptchaEnvironment;
 use std::fs;
 use std::io::Write;
 use std::time::Instant;
-use crate::captcha::ChineseClick0;
-use crate::environment::CaptchaEnvironment;
-
 
 #[test]
 fn test1() {
@@ -17,9 +16,11 @@ fn test1() {
     println!("Time elapsed: {:?}", duration);
 }
 
-
 #[test]
 fn test2() {
     let bytes = reqwest::blocking::get("https://www.modelscope.cn/models/Amorter/CaptchaBreakerModels/resolve/master/yolov11n_captcha.onnx").unwrap().bytes().unwrap();
-    fs::File::create("models/yolo.onnx").unwrap().write_all(&bytes).unwrap();
+    fs::File::create("models/yolo.onnx")
+        .unwrap()
+        .write_all(&bytes)
+        .unwrap();
 }

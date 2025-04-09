@@ -1,11 +1,11 @@
+use crate::captcha::CaptchaBreaker;
+use crate::loader::{ModelLoader, ModelLoaderTrait};
+use crate::model::Model;
+use ort::session::Session;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::error::Error;
 use std::rc::Rc;
-use ort::session::Session;
-use crate::captcha::CaptchaBreaker;
-use crate::loader::{ModelLoader, ModelLoaderTrait};
-use crate::model::Model;
 
 pub struct CaptchaEnvironment {
     model_loader: Box<dyn ModelLoaderTrait>,
@@ -36,7 +36,10 @@ impl CaptchaEnvironment {
         CB::build(self)
     }
 
-    pub(crate) fn load_models(&self, models: Vec<Model>) -> Result<Vec<Rc<Session>>, Box<dyn Error>> {
+    pub(crate) fn load_models(
+        &self,
+        models: Vec<Model>,
+    ) -> Result<Vec<Rc<Session>>, Box<dyn Error>> {
         let mut res = vec![];
         for model in models {
             res.push(self.load_one_model(model)?);
