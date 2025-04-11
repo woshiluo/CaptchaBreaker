@@ -14,6 +14,7 @@ pub trait CaptchaBreaker {
         Self: Sized;
 }
 
+#[cfg(feature = "chinese_click_0")]
 #[derive(Debug)]
 pub struct ChineseClick0 {
     yolo11n: Rc<Session>,
@@ -42,25 +43,20 @@ struct Bbox {
 }
 
 impl ChineseClick0 {
+
     pub fn run(&self, image: &DynamicImage) -> Vec<(f32, f32)> {
         // 1. 图像预处理
         let processed_image = self.preprocess_image(&image);
-
         // 2. YOLO目标检测
         let bboxes = self.detect_objects(&processed_image);
-
         // 3. 分离答案框和问题框
         let (ans_boxes, question_boxes) = self.split_boxes(bboxes);
-
         // 4. 截取并预处理图像块
         let combined_images = self.crop_and_resize(&processed_image, &ans_boxes, &question_boxes);
-
         // 5. 特征提取
         let features = self.extract_features(&combined_images);
-
         // 6. 构建匹配矩阵并计算匹配
         let matches = self.match_features(&features, ans_boxes.len());
-
         // 7. 生成结果
         self.generate_results(&ans_boxes, &matches)
     }

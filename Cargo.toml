@@ -1,6 +1,6 @@
 [package]
 name = "captcha_breaker"
-version = "0.0.0-dev.1"
+version = "0.0.0-dev.2"
 edition = "2024"
 license = "AGPL-3.0-only"
 description = "多种验证码识别实现"
@@ -18,16 +18,16 @@ harness = false
 [dependencies]
 image = "^0.25.6"
 ndarray = "^0.16.1"
-ort = { version = "=2.0.0-rc.9", features = [ "cuda" ] }
+ort = { version = "=2.0.0-rc.9"}
 reqwest = {version = "^0.12.15", features = ["blocking"]}
-num-traits = "^0.2.19"
-log = "^0.4.27"
-
 
 [features]
 default = ["chinese_click_0"]
+chinese_click_0 = []
+
+# ort
 cuda = ["ort/cuda"]
-chinese_click_0 = ["_model_yolo11n" ]
-
-
-_model_yolo11n = []
+tensorrt = ["ort/tensorrt"]
+directml = ["ort/directml"]
+nnapi = ["ort/nnapi"]
+coreml = ["ort/coreml"]

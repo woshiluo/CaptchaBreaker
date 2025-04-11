@@ -6,10 +6,12 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::error::Error;
 use std::rc::Rc;
+use ort::execution_providers::{CPUExecutionProvider, ExecutionProviderDispatch};
 
 pub struct CaptchaEnvironment {
     model_loader: Box<dyn ModelLoaderTrait>,
     models: RefCell<HashMap<Model, Rc<Session>>>,
+    ep: Vec<ExecutionProviderDispatch>,
 }
 
 impl Default for CaptchaEnvironment {
@@ -17,6 +19,7 @@ impl Default for CaptchaEnvironment {
         CaptchaEnvironment {
             model_loader: ModelLoader::DefaultModelLoader.get_model_loader(),
             models: Default::default(),
+            ep: vec![CPUExecutionProvider::default().build()],
         }
     }
 }
@@ -26,6 +29,23 @@ impl CaptchaEnvironment {
         CaptchaEnvironment {
             model_loader: model_loader.get_model_loader(),
             models: Default::default(),
+            ep: vec![CPUExecutionProvider::default().build()],
+        }
+    }
+
+    pub fn with_ep(ep: Vec<ExecutionProviderDispatch>) -> Self {
+        CaptchaEnvironment {
+            model_loader: ModelLoader::DefaultModelLoader.get_model_loader(),
+            models: Default::default(),
+            ep,
+        }
+    }
+
+    pub fn with_model_loader_and_ep(model_loader: Box<dyn ModelLoaderTrait>, ep: Vec<ExecutionProviderDispatch>) -> Self {
+        CaptchaEnvironment {
+            model_loader,
+            models: Default::default(),
+            ep,
         }
     }
 
@@ -53,7 +73,7 @@ impl CaptchaEnvironment {
             return Ok(Rc::clone(session));
         }
 
-        let session = self.model_loader.load(model)?;
+        let session = self.model_loader.load_with_execution_providers(model, self.ep.clone())?;
         let session_rc = Rc::new(session);
         self.models
             .borrow_mut()
