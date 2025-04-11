@@ -1,9 +1,12 @@
 # CaptchaBreaker
 验证码算法的AI瑞士军刀(Rust ort后端)
 
-
 ### 模型
 项目用到的所有模型都在 [CaptchaBreaker_models](https://github.com/Amorter/CaptchaBreaker_models) 开源
+
+### 文档
+- 使用文档 [USE.md](docs/USE.md)
+- 验证码类型文档 [CAPTCHA.md](docs/CAPTCHA.md)
 
 ## 使用条款
 
@@ -37,4 +40,4 @@
 ### 权利声明
 - 本项目独立著作权由 [@Amorter](https://github.com/Amorter?tab=repositories) 持有
 - AGPL-3.0 授权不可撤销，商业授权不影响已存在的 AGPL 合规使用
-- 本声明的解释权归著作权方所有，若与 AGPL-3.0 条款冲突，以[官方许可证文本](https://www.gnu.org/licenses/agpl-3.0.html)为准  
+- 本声明的解释权归著作权方所有，若与 AGPL-3.0 条款冲突，以[官方许可证文本](https://www.gnu.org/licenses/agpl-3.0.html)为准
