@@ -44,21 +44,21 @@ struct Bbox {
 
 impl ChineseClick0 {
 
-    pub fn run(&self, image: &DynamicImage) -> Vec<(f32, f32)> {
+    pub fn run(&self, image: &DynamicImage) -> Result<Vec<(f32, f32)>, Box<dyn Error>> {
         // 1. 图像预处理
         let processed_image = self.preprocess_image(&image);
         // 2. YOLO目标检测
-        let bboxes = self.detect_objects(&processed_image);
+        let bboxes = self.detect_objects(&processed_image)?;
         // 3. 分离答案框和问题框
         let (ans_boxes, question_boxes) = self.split_boxes(bboxes);
         // 4. 截取并预处理图像块
         let combined_images = self.crop_and_resize(&processed_image, &ans_boxes, &question_boxes);
         // 5. 特征提取
-        let features = self.extract_features(&combined_images);
+        let features = self.extract_features(&combined_images)?;
         // 6. 构建匹配矩阵并计算匹配
-        let matches = self.match_features(&features, ans_boxes.len());
+        let matches = self.match_features(&features, ans_boxes.len())?;
         // 7. 生成结果
-        self.generate_results(&ans_boxes, &matches)
+        Ok(self.generate_results(&ans_boxes, &matches))
     }
 
     /// 图像预处理
@@ -77,7 +77,7 @@ impl ChineseClick0 {
     }
 
     /// 目标检测
-    fn detect_objects(&self, image: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Vec<Bbox> {
+    fn detect_objects(&self, image: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<Vec<Bbox> , Box<dyn Error>>{
         let mut input = Array4::<f32>::zeros((1, 3, 384, 384));
         for x in 0..384 {
             for y in 0..384 {
@@ -90,14 +90,12 @@ impl ChineseClick0 {
 
         let outputs = self
             .yolo11n
-            .run(inputs!["images" => input].unwrap())
-            .unwrap();
+            .run(inputs!["images" => input]?)?;
         let output = outputs["output0"]
-            .try_extract_tensor::<f32>()
-            .unwrap()
+            .try_extract_tensor::<f32>()?
             .slice_move(s![0, .., ..]);
 
-        output
+        Ok(output
             .axis_iter(Axis(0))
             .filter(|row| row[Dim(4)] > 0.5)
             .map(|row| Bbox {
@@ -108,7 +106,7 @@ impl ChineseClick0 {
                 confidence: row[Dim(4)],
                 class: row[Dim(5)],
             })
-            .collect()
+            .collect())
     }
 
     /// 分离答案框和问题框
@@ -179,21 +177,18 @@ impl ChineseClick0 {
     }
 
     /// 特征提取
-    fn extract_features(&self, images: &Array4<f32>) -> Array2<f32> {
+    fn extract_features(&self, images: &Array4<f32>) -> Result<Array2<f32>, Box<dyn Error >> {
         let outputs = self
             .siamese
-            .run(inputs!["input" => images.clone()].unwrap())
-            .unwrap();
-        outputs["output"]
-            .try_extract_tensor::<f32>()
-            .unwrap()
-            .into_dimensionality::<Ix2>()
-            .unwrap()
-            .to_owned()
+            .run(inputs!["input" => images.clone()]?)?;
+        Ok(outputs["output"]
+            .try_extract_tensor::<f32>()?
+            .into_dimensionality::<Ix2>()?
+            .to_owned())
     }
 
     /// 构建匹配矩阵并计算匹配
-    fn match_features(&self, features: &Array2<f32>, ans_count: usize) -> Vec<usize> {
+    fn match_features(&self, features: &Array2<f32>, ans_count: usize) -> Result<Vec<usize>, Box<dyn Error>> {
         // 分离特征
         let (ans_features, question_features) = features.view().split_at(Axis(0), ans_count);
 
@@ -201,7 +196,7 @@ impl ChineseClick0 {
         let cost_matrix = self.build_cost_matrix(&question_features, &ans_features);
 
         // 匈牙利算法
-        self.hungarian(&cost_matrix).0
+        Ok(self.hungarian(&cost_matrix)?.0)
     }
 
     /// 构建成本矩阵
@@ -219,8 +214,8 @@ impl ChineseClick0 {
     }
 
     /// 匈牙利算法
-    fn hungarian(&self, matrix: &Array2<f32>) -> (Vec<usize>, Vec<usize>) {
-        lapjv::lapjv(matrix).unwrap()
+    fn hungarian(&self, matrix: &Array2<f32>) -> Result<(Vec<usize>, Vec<usize>), Box<dyn Error>> {
+        Ok(lapjv::lapjv(matrix)?)
     }
 
     /// 生成结果字符串

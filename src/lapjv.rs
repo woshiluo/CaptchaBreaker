@@ -16,6 +16,7 @@ pub(crate) enum ErrorKind {
     Cancelled,
 }
 
+
 #[derive(Debug)]
 pub(crate) struct LapJVError {
     kind: ErrorKind,
