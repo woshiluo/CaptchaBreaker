@@ -111,6 +111,7 @@ impl ChineseClick0 {
 
     /// 分离答案框和问题框
     fn split_boxes(&self, mut bboxes: Vec<Bbox>) -> (Vec<Bbox>, Vec<Bbox>) {
+        bboxes.sort_by_key(|b| (b.x_min*100f32) as u32);
         bboxes.drain(..).partition(|b| b.y_min < 344.0)
     }
 

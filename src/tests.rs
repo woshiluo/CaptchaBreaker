@@ -9,8 +9,9 @@ fn test1() {
     let environment = CaptchaEnvironment::default(); // 移除 Arc
     let cb: ChineseClick0 = environment.load_captcha_breaker().unwrap();
     let start_time = Instant::now();
-    for _ in 0..100 {
-        cb.run(&image::open("images/0.jpg").unwrap());
+    for _ in 0..1 {
+        let res = cb.run(&image::open("images/16.jpg").unwrap()).unwrap();
+        println!("{:?}", res);
     }
     let duration = start_time.elapsed();
     println!("Time elapsed: {:?}", duration);
