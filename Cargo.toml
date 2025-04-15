@@ -1,6 +1,6 @@
 [package]
 name = "captcha_breaker"
-version = "0.0.0-dev.2"
+version = "0.0.0-dev.3"
 edition = "2024"
 license = "AGPL-3.0-only"
 description = "多种验证码识别实现"

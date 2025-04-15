@@ -5,7 +5,7 @@ use ndarray::{Array2, Array4, ArrayView2, Axis, Dim, Ix2, s};
 use ort::inputs;
 use ort::session::Session;
 use std::error::Error;
-use std::rc::Rc;
+use std::sync::Arc;
 use crate::lapjv;
 
 pub trait CaptchaBreaker {
@@ -17,8 +17,8 @@ pub trait CaptchaBreaker {
 #[cfg(feature = "chinese_click_0")]
 #[derive(Debug)]
 pub struct ChineseClick0 {
-    yolo11n: Rc<Session>,
-    siamese: Rc<Session>,
+    yolo11n: Arc<Session>,
+    siamese: Arc<Session>,
 }
 
 impl CaptchaBreaker for ChineseClick0 {

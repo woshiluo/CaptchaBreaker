@@ -5,12 +5,12 @@ use ort::session::Session;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::error::Error;
-use std::rc::Rc;
+use std::sync::Arc;
 use ort::execution_providers::{CPUExecutionProvider, ExecutionProviderDispatch};
 
 pub struct CaptchaEnvironment {
     model_loader: Box<dyn ModelLoaderTrait>,
-    models: RefCell<HashMap<Model, Rc<Session>>>,
+    models: RefCell<HashMap<Model, Arc<Session>>>,
     ep: Vec<ExecutionProviderDispatch>,
 }
 
@@ -59,7 +59,7 @@ impl CaptchaEnvironment {
     pub(crate) fn load_models(
         &self,
         models: Vec<Model>,
-    ) -> Result<Vec<Rc<Session>>, Box<dyn Error>> {
+    ) -> Result<Vec<Arc<Session>>, Box<dyn Error>> {
         let mut res = vec![];
         for model in models {
             res.push(self.load_one_model(model)?);
@@ -67,17 +67,17 @@ impl CaptchaEnvironment {
         Ok(res)
     }
 
-    fn load_one_model(&self, model: Model) -> Result<Rc<Session>, Box<dyn Error>> {
+    fn load_one_model(&self, model: Model) -> Result<Arc<Session>, Box<dyn Error>> {
         // 检查模型是否已加载
         if let Some(session) = self.models.borrow().get(&model) {
-            return Ok(Rc::clone(session));
+            return Ok(Arc::clone(session));
         }
 
         let session = self.model_loader.load_with_execution_providers(model, self.ep.clone())?;
-        let session_rc = Rc::new(session);
+        let session_rc = Arc::new(session);
         self.models
             .borrow_mut()
-            .insert(model, Rc::clone(&session_rc));
+            .insert(model, Arc::clone(&session_rc));
 
         Ok(session_rc)
     }
