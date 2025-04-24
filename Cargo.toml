@@ -18,7 +18,12 @@ harness = false
 [dependencies]
 image = "^0.25.6"
 ndarray = "^0.16.1"
-ort = { version = "=2.0.0-rc.9", default-features = false, features = [
+# ort = { version = "=2.0.0-rc.4", default-features = false, features = [
+#   "ndarray",
+#   "half",
+#   "copy-dylibs",
+# ] }
+ort = { git = "https://github.com/woshiluo/ort", default-features = false, features = [
   "ndarray",
   "half",
   "copy-dylibs",
